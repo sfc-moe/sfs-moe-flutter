@@ -1,9 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:html/parser.dart' show parse;
+import 'package:euc/euc.dart';
 import 'package:dio/dio.dart';
+import 'package:sfs/utils/sfs-auth.dart';
 import '../utils/consts.dart';
-import '../utils/euc.dart';
+
 import './app.dart';
 
 class LoginWidget extends StatefulWidget {
@@ -13,11 +14,21 @@ class LoginWidget extends StatefulWidget {
 
 class _LoginWidgetState extends State<LoginWidget> {
   final _formKey = new GlobalKey<FormState>();
-  String _username = '';
-  String _password = '';
+  String _username;
+  String _password;
   bool _isLoading = false;
   bool _autoLogin = false;
-  
+
+  _LoginWidgetState() {
+    SfsAuth.profile.then((profile) {
+      if (profile != null) {
+        _username = profile.username;
+        _password = profile.password;
+        login();
+      }
+    });
+  }
+
   Widget _showCircularProgress(){
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -39,27 +50,81 @@ class _LoginWidgetState extends State<LoginWidget> {
           responseType: ResponseType.bytes,
         ),
         data: FormData.fromMap({
-          'u_login': this._username,
-          'u_pass': this._password,
+          'u_login': _username,
+          'u_pass': _password,
           'lang': 'ja',
         }),
       );
 
+      var raw = EucJP().decode(res.data);
+      var document = parse(raw);
+      var meta = document.querySelector('meta').attributes['content'];
+
+      if (meta == null || meta[0] != '0') {
+        setState(() {
+          _isLoading = false;
+        });
+
+        print(meta);
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Login Failed"),
+              content: Text("Please Check your Username or Password"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Dismiss'),
+                  onPressed: () { Navigator.of(context).pop(); },
+                ),
+              ],
+            );
+          }
+        );
+        return;
+      }
+
+      var uri = Uri.parse(meta.substring(7));
+      await SfsAuth.setToken(uri.queryParameters['id']);
+
+      if (this._autoLogin) {
+        await SfsAuth.updateProfile(SfsCredential(
+          username: this._username,
+          password: this._password,
+        ));
+      }
+      
       setState(() {
-        _username = EucJP().decode(res.data);
         _isLoading = false;
       });
 
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => AppWidget())
+      );
+
     } catch (e) {
-      print("ERROR");
-      print(e);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Error Occured"),
+            content: Text(e.toString()),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Dismiss'),
+                onPressed: () { Navigator.of(context).pop(); },
+              ),
+            ],
+          );
+        }
+      );
+
       setState(() {
         _isLoading = false;
       });
     }
-
-    
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => AppWidget()));
   }
 
   @override
@@ -78,9 +143,6 @@ class _LoginWidgetState extends State<LoginWidget> {
                 child: ListView(
                   shrinkWrap: true,
                   children: <Widget>[
-                    Text(
-                      _username,
-                    ),
                     new Hero(
                       tag: 'hero',
                       child: CircleAvatar(
@@ -102,7 +164,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                               color: Colors.grey,
                             )),
                         validator: (value) => value.isEmpty ? 'Username can\'t be empty' : null,
-                        onSaved: (value) => _username = value.trim(),
+                        onChanged: (value) => _username = value.trim(),
                       ),
                     ),
                     Padding(
@@ -118,7 +180,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                               color: Colors.grey,
                             )),
                         validator: (value) => value.isEmpty ? 'Password can\'t be empty' : null,
-                        onSaved: (value) => _password = value.trim(),
+                        onChanged: (value) => _password = value.trim(),
                       ),
                     ),
                     SwitchListTile(

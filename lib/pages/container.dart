@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
 import '../utils/settings.dart';
 
 class ContainerWidget extends StatefulWidget {
@@ -29,15 +29,15 @@ class _ContainerWidgetState extends State<ContainerWidget> {
     TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     Text(
-      'Index 0: Timetable',
+      'Coming Soon...',
       style: optionStyle,
     ),
     Text(
-      'Index 1: Assignments',
+      'Coming Soon...',
       style: optionStyle,
     ),
     Text(
-      'Index 2: Bus Timer',
+      'Coming Soon...',
       style: optionStyle,
     ),
   ];
@@ -111,7 +111,7 @@ class _ContainerWidgetState extends State<ContainerWidget> {
               leading: const Icon(Icons.local_activity),
               title: Text('Go To Wellness'),
               onTap: () async {
-                print(Platform.operatingSystem);
+                await launch('https://wellness.sfc.keio.ac.jp/');
               },
             ),
             ListTile(
