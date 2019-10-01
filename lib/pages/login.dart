@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:euc/euc.dart';
 import 'package:dio/dio.dart';
-import 'package:sfs/utils/sfs-auth.dart';
-import '../utils/consts.dart';
-
-import './app.dart';
+import 'package:sfs/pages/app.dart';
+import 'package:sfs/utils/sfs_auth.dart';
+import 'package:sfs/utils/consts.dart';
 
 class LoginWidget extends StatefulWidget {
   @override
@@ -13,7 +12,7 @@ class LoginWidget extends StatefulWidget {
 }
 
 class _LoginWidgetState extends State<LoginWidget> {
-  final _formKey = new GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   String _username;
   String _password;
   bool _isLoading = false;
@@ -56,16 +55,14 @@ class _LoginWidgetState extends State<LoginWidget> {
         }),
       );
 
-      var raw = EucJP().decode(res.data);
-      var document = parse(raw);
-      var meta = document.querySelector('meta').attributes['content'];
+      final raw = EucJP().decode(res.data);
+      final document = parse(raw);
+      final meta = document.querySelector('meta').attributes['content'];
 
       if (meta == null || meta[0] != '0') {
         setState(() {
           _isLoading = false;
         });
-
-        print(meta);
 
         showDialog(
           context: context,
@@ -85,7 +82,7 @@ class _LoginWidgetState extends State<LoginWidget> {
         return;
       }
 
-      var uri = Uri.parse(meta.substring(7));
+      final uri = Uri.parse(meta.substring(7));
       await SfsAuth.setToken(uri.queryParameters['id']);
 
       if (this._autoLogin) {
@@ -94,7 +91,27 @@ class _LoginWidgetState extends State<LoginWidget> {
           password: this._password,
         ));
       }
-      
+
+      // Check if timetable has fixed
+      final timetablePage = await client.get(
+        '${Consts.SFS_HOST}/portal_s/s01.cgi',
+        queryParameters: {
+          'id': await SfsAuth.token,
+          'type': 's',
+          'mode': 1,
+          'lang': 'ja',
+        },
+        options: Options(
+          contentType: 'application/x-www-form-urlencoded',
+          responseType: ResponseType.bytes,
+        ),
+      );
+
+      final timetableDom = parse(EucJP().decode(timetablePage.data));
+      final frameUrl = timetableDom.querySelector('#frame_set').attributes['src'];
+      final fix = Uri.parse(frameUrl).queryParameters['fix'];    
+      await SfsAuth.setFix(fix);
+
       setState(() {
         _isLoading = false;
       });
@@ -143,7 +160,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                 child: ListView(
                   shrinkWrap: true,
                   children: <Widget>[
-                    new Hero(
+                    Hero(
                       tag: 'hero',
                       child: CircleAvatar(
                         backgroundColor: Colors.transparent,
@@ -153,13 +170,13 @@ class _LoginWidgetState extends State<LoginWidget> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0.0, 70.0, 0.0, 0.0),
-                      child: new TextFormField(
+                      child: TextFormField(
                         maxLines: 1,
                         keyboardType: TextInputType.text,
                         autofocus: false,
-                        decoration: new InputDecoration(
+                        decoration: InputDecoration(
                             hintText: 'Username',
-                            icon: new Icon(
+                            icon: Icon(
                               Icons.person,
                               color: Colors.grey,
                             )),
@@ -169,13 +186,13 @@ class _LoginWidgetState extends State<LoginWidget> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
-                      child: new TextFormField(
+                      child: TextFormField(
                         maxLines: 1,
                         obscureText: true,
                         autofocus: false,
-                        decoration: new InputDecoration(
+                        decoration: InputDecoration(
                             hintText: 'Password',
-                            icon: new Icon(
+                            icon: Icon(
                               Icons.lock,
                               color: Colors.grey,
                             )),
@@ -192,25 +209,25 @@ class _LoginWidgetState extends State<LoginWidget> {
                         });
                       },
                     ),
-                    new Padding(
+                    Padding(
                       padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
                       child: SizedBox(
                         height: 40.0,
-                        child: new RaisedButton(
+                        child: RaisedButton(
                           elevation: 5.0,
-                          shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                           color: Colors.blue,
-                          child: new Text('Login',
-                                  style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+                          child: Text('Login',
+                                  style: TextStyle(fontSize: 20.0, color: Colors.white)),
                           onPressed: () {
                             login();
                           },
                         ),
                       )
                     ),
-                    new FlatButton(
-                      child: new Text('Forget Password',
-                              style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.w300)),
+                    FlatButton(
+                      child: Text('Forget Password',
+                              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w300)),
                       onPressed: () {
                         // TODO: Forget Password
                       },

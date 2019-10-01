@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../utils/settings.dart';
+import 'package:sfs/pages/login.dart';
+import 'package:sfs/utils/consts.dart';
+import 'package:sfs/utils/settings.dart';
+import 'package:sfs/utils/sfs_auth.dart';
 
 class ContainerWidget extends StatefulWidget {
   ContainerWidget({Key key, @required this.onThemeChanged}) : super(key: key);
@@ -11,6 +14,12 @@ class ContainerWidget extends StatefulWidget {
 }
 
 class _ContainerWidgetState extends State<ContainerWidget> {
+  final ValueChanged<bool> onThemeChanged;
+  int _selectedIndex = 0;
+  bool _darkMode = false;
+  bool _isLoading = false;
+  String _sfsUrl = Consts.SFS_HOST;
+
   _ContainerWidgetState({@required this.onThemeChanged}) {
     Settings.darkMode.then((value) {
       this.setState(() {
@@ -18,12 +27,13 @@ class _ContainerWidgetState extends State<ContainerWidget> {
         onThemeChanged(value);
       });
     });
-  }
 
-  final ValueChanged<bool> onThemeChanged;
-  int _selectedIndex = 0;
-  bool _darkMode = false;
-  bool _isLoading = false;
+    SfsAuth.token.then((value) {
+      this.setState(() {
+        _sfsUrl = "https://vu.sfc.keio.ac.jp/sfc-sfs/portal_s/s01.cgi?lang=ja&id=$value&type=s&mode=0";
+      });
+    });
+  }
 
   static const TextStyle optionStyle =
     TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
@@ -102,9 +112,8 @@ class _ContainerWidgetState extends State<ContainerWidget> {
             ListTile(
               leading: const Icon(Icons.web),
               title: Text('Go To SFC-SFS'),
-              onTap: () {
-                // Update the state of the app.
-                // ...
+              onTap: () async {
+                await launch(_sfsUrl);
               },
             ),
             ListTile(
@@ -125,9 +134,12 @@ class _ContainerWidgetState extends State<ContainerWidget> {
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: Text('Logout'),
-              onTap: () {
-                // Update the state of the app.
-                // ...
+              onTap: () async {
+                await SfsAuth.removeProfile();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (BuildContext context) => LoginWidget())
+                );
               },
             ),
             SwitchListTile(

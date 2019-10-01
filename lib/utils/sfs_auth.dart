@@ -38,4 +38,14 @@ class SfsAuth {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
+
+  static setFix(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fix', token);
+  }
+
+  static Future<String> get fix async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('fix');
+  }
 }
