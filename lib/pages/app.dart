@@ -4,10 +4,10 @@ import '../utils/settings.dart';
 
 class AppWidget extends StatefulWidget {
   @override
-  _StatefulWidgetState createState() => new _StatefulWidgetState();
+  _AppWidgetState createState() => new _AppWidgetState();
 }
 
-class _StatefulWidgetState extends State<StatefulWidget> {
+class _AppWidgetState extends State<StatefulWidget> {
   static const String _title = 'SFS Moe';
   ThemeData theme = ThemeData.light();
 

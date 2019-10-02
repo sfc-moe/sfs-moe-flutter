@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sfs/pages/assignments.dart';
 import 'package:sfs/pages/login.dart';
 import 'package:sfs/utils/consts.dart';
 import 'package:sfs/utils/settings.dart';
@@ -10,7 +11,8 @@ class ContainerWidget extends StatefulWidget {
 
   final ValueChanged<bool> onThemeChanged;
   @override
-  _ContainerWidgetState createState() => _ContainerWidgetState(onThemeChanged: onThemeChanged);
+  _ContainerWidgetState createState() =>
+      _ContainerWidgetState(onThemeChanged: onThemeChanged);
 }
 
 class _ContainerWidgetState extends State<ContainerWidget> {
@@ -30,22 +32,20 @@ class _ContainerWidgetState extends State<ContainerWidget> {
 
     SfsAuth.token.then((value) {
       this.setState(() {
-        _sfsUrl = "https://vu.sfc.keio.ac.jp/sfc-sfs/portal_s/s01.cgi?lang=ja&id=$value&type=s&mode=0";
+        _sfsUrl =
+            "https://vu.sfc.keio.ac.jp/sfc-sfs/portal_s/s01.cgi?lang=ja&id=$value&type=s&mode=0";
       });
     });
   }
 
   static const TextStyle optionStyle =
-    TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Coming Soon...',
-      style: optionStyle,
-    ),
-    Text(
-      'Coming Soon...',
-      style: optionStyle,
-    ),
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static List<Widget> _widgetOptions = <Widget>[
+    AssignmentsWidget(),
+    // Text(
+    //   'Coming Soon...',
+    //   style: optionStyle,
+    // ),
     Text(
       'Coming Soon...',
       style: optionStyle,
@@ -58,10 +58,14 @@ class _ContainerWidgetState extends State<ContainerWidget> {
     });
   }
 
-  Widget _showCircularProgress(){
+  Widget _showCircularProgress() {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
-    } return Container(height: 0.0, width: 0.0,);
+    }
+    return Container(
+      height: 0.0,
+      width: 0.0,
+    );
   }
 
   @override
@@ -80,10 +84,10 @@ class _ContainerWidgetState extends State<ContainerWidget> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-          icon: Icon(Icons.school),
-          title: Text('Timetable'),
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.school),
+          //   title: Text('Timetable'),
+          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
             title: Text('Assignments'),
@@ -102,9 +106,7 @@ class _ContainerWidgetState extends State<ContainerWidget> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              child: Center(
-                child: Image.asset('assets/images/logo.png')
-              ),
+              child: Center(child: Image.asset('assets/images/logo.png')),
               decoration: BoxDecoration(
                 color: Colors.blueGrey,
               ),
@@ -123,23 +125,23 @@ class _ContainerWidgetState extends State<ContainerWidget> {
                 await launch('https://wellness.sfc.keio.ac.jp/');
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: Text('Settings'),
-              onTap: () {
-                // Update the state of the app.
-                // ...
-              },
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.settings),
+            //   title: Text('Settings'),
+            //   onTap: () {
+            //     // Update the state of the app.
+            //     // ...
+            //   },
+            // ),
             ListTile(
               leading: const Icon(Icons.exit_to_app),
               title: Text('Logout'),
               onTap: () async {
                 await SfsAuth.removeProfile();
                 Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (BuildContext context) => LoginWidget())
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => LoginWidget()));
               },
             ),
             SwitchListTile(

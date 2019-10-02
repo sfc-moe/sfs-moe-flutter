@@ -1,5 +1,3 @@
-
-
 class TimeHelper {
   static String get term {
     final today = DateTime.now();
@@ -26,6 +24,6 @@ class TimeHelper {
       year = today.year - 1;
     }
 
-    return DateTime.utc(year, month, day, hour, min);
+    return DateTime.utc(year, month, day, hour - 9, min);
   }
 }
