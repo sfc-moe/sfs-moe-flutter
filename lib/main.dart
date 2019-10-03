@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import './pages/login.dart';
+import 'package:sfs/pages/splash.dart';
 
 void main() => runApp(MaterialApp(
   title: 'SFS Moe',
-  home: LoginWidget(),
+  home: SplashWidget(),
 ));
