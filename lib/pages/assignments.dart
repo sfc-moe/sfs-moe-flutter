@@ -83,8 +83,7 @@ class _AssignmentsWidgetState extends State<StatefulWidget> {
       }).toList();
     });
 
-    final reports =
-        (await Future.wait(reportFutures)).expand((i) => i).toList();
+    final reports = (await Future.wait(reportFutures)).expand((i) => i);
 
     final upcoming = reports
         .where((a) => a.submitted == false)
@@ -110,7 +109,8 @@ class _AssignmentsWidgetState extends State<StatefulWidget> {
 
     if (upcoming.length == 0) {
       cardList.add(SizedBox(height: 16));
-      cardList.add(Center(child: Text(
+      cardList.add(Center(
+          child: Text(
         "Empty",
         style: TextStyle(fontSize: 24),
       )));
@@ -131,7 +131,8 @@ class _AssignmentsWidgetState extends State<StatefulWidget> {
 
     if (missed.length == 0) {
       cardList.add(SizedBox(height: 16));
-      cardList.add(Center(child: Text(
+      cardList.add(Center(
+          child: Text(
         "Empty",
         style: TextStyle(fontSize: 24),
       )));
@@ -152,7 +153,8 @@ class _AssignmentsWidgetState extends State<StatefulWidget> {
 
     if (finished.length == 0) {
       cardList.add(SizedBox(height: 16));
-      cardList.add(Center(child: Text(
+      cardList.add(Center(
+          child: Text(
         "Empty",
         style: TextStyle(fontSize: 24),
       )));
