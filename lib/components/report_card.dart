@@ -19,12 +19,13 @@ class ReportCardWidget extends StatelessWidget {
         padding: EdgeInsets.only(top: 5, right: 10, bottom: 5, left: 10),
         child: Card(
           color: background,
-          child: Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                  onTap: () async {
-                    await launch("${Consts.SFS_HOST}/sfs_class/student/${assignment.link}");
-                  },
+          child: InkWell(
+              onTap: () async {
+                await launch(
+                    "${Consts.SFS_HOST}/sfs_class/student/${assignment.link}");
+              },
+              child: Align(
+                  alignment: Alignment.centerLeft,
                   child: Padding(
                       padding: EdgeInsets.only(
                           top: 20, right: 20, bottom: 20, left: 20),

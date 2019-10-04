@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:euc/euc.dart';
 import 'package:dio/dio.dart';
 import 'package:html/parser.dart' show parse;
+import 'package:permission/permission.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sfs/pages/app.dart';
 import 'package:sfs/utils/sfs_auth.dart';
@@ -19,14 +22,63 @@ class _LoginWidgetState extends State<LoginWidget> {
   bool _isLoading = false;
   bool _autoLogin = false;
 
-  _LoginWidgetState() {
-    SfsAuth.profile.then((profile) {
-      if (profile != null) {
-        _username = profile.username;
-        _password = profile.password;
-        login();
-      }
-    });
+  @override
+  void initState() {
+    super.initState();
+    _initState();
+  }
+
+  void _initState() async {
+    await _checkPermission();
+  }
+
+  Future<void> _checkPermission() async {
+    List<PermissionName> permissionList = [];
+    if (Platform.isIOS) {
+      permissionList = [];
+    } else if (Platform.isAndroid) {
+      permissionList = [];
+    }
+
+    if (permissionList.isEmpty) {
+      return _checkAutoLogin();
+    }
+    var permissions = await Permission.getPermissionsStatus(permissionList);
+    print(permissions.first.permissionStatus.toString());
+    if (permissions
+        .map((p) =>
+            (p.permissionStatus == PermissionStatus.always) ||
+            (p.permissionStatus == PermissionStatus.allow))
+        .reduce((a, b) => a && b)) {
+      return _checkAutoLogin();
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Permission Required"),
+              content: Text("SFS-Moe requires Internet Permission for Working"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Go to Settings'),
+                  onPressed: () async {
+                    await Permission.requestPermissions(permissionList);
+                    await _checkPermission();
+                  },
+                ),
+              ],
+            );
+          });
+    }
+  }
+
+  void _checkAutoLogin() async {
+    var profile = await SfsAuth.profile;
+    if (profile != null) {
+      _username = profile.username;
+      _password = profile.password;
+      login();
+    }
   }
 
   Widget _showCircularProgress() {

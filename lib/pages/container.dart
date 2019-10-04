@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sfs/pages/assignments.dart';
@@ -10,6 +13,7 @@ class ContainerWidget extends StatefulWidget {
   ContainerWidget({Key key, @required this.onThemeChanged}) : super(key: key);
 
   final ValueChanged<bool> onThemeChanged;
+  
   @override
   _ContainerWidgetState createState() =>
       _ContainerWidgetState(onThemeChanged: onThemeChanged);
@@ -21,8 +25,19 @@ class _ContainerWidgetState extends State<ContainerWidget> {
   bool _darkMode = false;
   bool _isLoading = false;
   String _sfsUrl = Consts.SFS_HOST;
+  BannerAd _bannerAd;
 
-  _ContainerWidgetState({@required this.onThemeChanged}) {
+  static const MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+    testDevices: null,
+    childDirected: true,
+    nonPersonalizedAds: false,
+  );
+
+  _ContainerWidgetState({@required this.onThemeChanged});
+
+  @override
+  void initState() {
+    super.initState();
     Settings.darkMode.then((value) {
       this.setState(() {
         _darkMode = value;
@@ -36,6 +51,48 @@ class _ContainerWidgetState extends State<ContainerWidget> {
             "https://vu.sfc.keio.ac.jp/sfc-sfs/portal_s/s01.cgi?lang=ja&id=$value&type=s&mode=0";
       });
     });
+
+    String _appId =  FirebaseAdMob.testAppId;
+    if (Platform.isAndroid) {
+      _appId = 'ca-app-pub-5302383111484719~4047941515';
+    } else if (Platform.isIOS) {
+      _appId = 'ca-app-pub-5302383111484719~5959788980';
+    }
+
+    FirebaseAdMob.instance.initialize(appId: _appId);
+    _bannerAd = createBannerAd()
+      ..load()
+      ..show(
+        anchorOffset: 60.0,
+        anchorType: AnchorType.bottom,
+      );
+
+  }
+
+  BannerAd createBannerAd() {
+    String _bannerId;
+
+    if (Platform.isAndroid) {
+      _bannerId = 'ca-app-pub-5302383111484719/5228821933';
+    } else if (Platform.isIOS) {
+      _bannerId = 'ca-app-pub-5302383111484719/2055670165';
+    } else {
+      _bannerId = BannerAd.testAdUnitId;
+    }
+
+    return BannerAd(
+      adUnitId: _bannerId,
+      size: AdSize.banner,
+      listener: (MobileAdEvent event) {
+        print("BannerAd event $event");
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
   }
 
   static const TextStyle optionStyle =

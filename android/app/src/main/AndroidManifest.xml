@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="moe.keio.sfs">
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
@@ -29,6 +30,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-5302383111484719~4047941515"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
